@@ -33,12 +33,14 @@ class RestaurantDate(models.Model):
 class RestaurantSeatAM(models.Model):
     date_id = models.ForeignKey(RestaurantDate, on_delete=models.CASCADE)
     seat_slot_am = models.CharField(max_length=550, null=True)
+    is_book = models.BooleanField(default=False)
     restaurant_id = models.ForeignKey(RestaurantInformation, on_delete=models.CASCADE)
 
 
 class RestaurantSeatPM(models.Model):
     date_id = models.ForeignKey(RestaurantDate, on_delete=models.CASCADE)
     seat_slot_pm = models.CharField(max_length=550, null=True)
+    is_book = models.BooleanField(default=False)
     restaurant_id = models.ForeignKey(RestaurantInformation, on_delete=models.CASCADE)
 
 

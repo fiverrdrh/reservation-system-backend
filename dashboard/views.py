@@ -133,10 +133,10 @@ class RestaurantFullRecord(APIView):
             restaurant_info = RestaurantInformation.objects.filter(id=id)
             restaurant_info_serializer = RestaurantSerializer(restaurant_info, many=True).data
             restaurant_date = RestaurantDate.objects.filter(restaurant_id=id, date=date)
-            restaurant_seat_am = RestaurantSeatAM.objects.filter(restaurant_id=id, date_id=restaurant_date.get().id)
+            restaurant_seat_am = RestaurantSeatAM.objects.filter(restaurant_id=id, date_id=restaurant_date.get().id, is_book=False).order_by("id")
             seat_am = SeatAMSerializer(restaurant_seat_am, many=True).data
             restaurant_seat_pm = RestaurantSeatPM.objects.filter(restaurant_id=id,
-                                                                 date_id=restaurant_date.get().id)
+                                                                 date_id=restaurant_date.get().id, is_book=False).order_by("id")
             seat_pm = SeatPmSerializer(restaurant_seat_pm, many=True).data
             resultset = {"restaurant_info":restaurant_info_serializer, "seat_am": seat_am, "seat_pm": seat_pm}
             return success_response(data=resultset)
