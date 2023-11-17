@@ -83,8 +83,62 @@ class RestaurantList(APIView):
 
     def get(self, request):
         try:
-            restaurant_info = RestaurantInformation.objects.filter(user_id = request.user.pk)
+            if request.user.username == "superadmin":
+                restaurant_info = RestaurantInformation.objects.all()
+            else:
+                restaurant_info = RestaurantInformation.objects.filter(user_id=request.user.pk)
             user_data = self.serializer_class(restaurant_info, many=True).data
             return success_response(data=user_data)
+        except Exception as e:
+            return error_response(message=str(e))
+
+
+class SeatingList(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        try:
+            user_id = request.user.pk
+            restaurant_information = RestaurantInformation.objects.filter(user_id=user_id)
+
+        except Exception as e:
+            return error_response(message=str(e))
+
+
+class RestaurantNameList(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        try:
+            restaurant_ls = []
+            restaurant_information = RestaurantInformation.objects.all()
+            serializer_data = RestaurantSerializer(restaurant_information, many=True).data
+            for data in serializer_data:
+                restaurant_ls.append({
+                    "id" : data["id"],
+                    "restaurant_name": data["restaurant_name"]
+                })
+            return success_response(data=restaurant_ls)
+        except Exception as e:
+            return error_response(message=str(e))
+
+
+class RestaurantFullRecord(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        try:
+            id = request.GET["id"]
+            date = request.GET["date"]
+            restaurant_info = RestaurantInformation.objects.filter(id=id)
+            restaurant_info_serializer = RestaurantSerializer(restaurant_info, many=True).data
+            restaurant_date = RestaurantDate.objects.filter(restaurant_id=id, date=date)
+            restaurant_seat_am = RestaurantSeatAM.objects.filter(restaurant_id=id, date_id=restaurant_date.get().id)
+            seat_am = SeatAMSerializer(restaurant_seat_am, many=True).data
+            restaurant_seat_pm = RestaurantSeatPM.objects.filter(restaurant_id=id,
+                                                                 date_id=restaurant_date.get().id)
+            seat_pm = SeatPmSerializer(restaurant_seat_pm, many=True).data
+            resultset = {"restaurant_info":restaurant_info_serializer, "seat_am": seat_am, "seat_pm": seat_pm}
+            return success_response(data=resultset)
         except Exception as e:
             return error_response(message=str(e))
