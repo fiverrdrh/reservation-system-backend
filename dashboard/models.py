@@ -44,3 +44,15 @@ class RestaurantSeatPM(models.Model):
     restaurant_id = models.ForeignKey(RestaurantInformation, on_delete=models.CASCADE)
 
 
+class Reservation(models.Model):
+    restaurant_id = models.ForeignKey(RestaurantInformation, on_delete=models.CASCADE)
+    seat_slot_am = models.ForeignKey(RestaurantSeatAM, on_delete=models.CASCADE, null=True)
+    seat_slot_pm = models.ForeignKey(RestaurantSeatPM, on_delete=models.CASCADE, null=True)
+    total_person = models.IntegerField(null=True)
+    first_name = models.CharField(max_length=525, null=True)
+    last_name = models.CharField(max_length=525, null=True)
+    phone_number = models.CharField(max_length=525, null=True)
+    email = models.CharField(max_length=525, null=True)
+
+
+

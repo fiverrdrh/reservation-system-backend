@@ -142,3 +142,56 @@ class RestaurantFullRecord(APIView):
             return success_response(data=resultset)
         except Exception as e:
             return error_response(message=str(e))
+
+
+class ReservationSlot(APIView):
+    def post(self, request):
+        try:
+            data_to_save = {}
+            restaurant_id = request.data.get("id")
+            if "seat_am" in request.data:
+                seat_am = request.data.get("seat_am")
+                seat_obj = RestaurantSeatAM.objects.get(id=seat_am[0]["id"], date_id=seat_am[0]["date_id"])
+                seat_obj.is_book = True
+                seat_obj.save()
+                data_to_save["seat_slot_am"] = seat_obj.pk
+            elif "seat_pm" in request.data:
+                seat_pm = request.data.get("seat_pm")
+                seat_obj = RestaurantSeatAM.objects.get(id=seat_pm[0]["id"], date_id=seat_pm[0]["date_id"])
+                seat_obj.is_book = True
+                seat_obj.save()
+                data_to_save["seat_slot_pm"] = seat_obj.pk
+            data_to_save["restaurant_id"] = restaurant_id
+            data_to_save["total_person"] = request.data.get("total_person")
+            data_to_save["first_name"] = request.data.get("first_name")
+            data_to_save["last_name"] = request.data.get("last_name")
+            data_to_save["phone_number"] = request.data.get("phone_number")
+            data_to_save["email"] = request.data.get("email")
+            reservation_seat_serializer = ReservationSeatSerializer(data=data_to_save)
+            if reservation_seat_serializer.is_valid():
+                reservation_seat_serializer.save()
+                return success_response(message="Reservation done successfully")
+            return error_response(message="Invalid data")
+        except Exception as e:
+            return error_response(message=str(e))
+
+
+class ReservationList(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        try:
+            username = request.user.username
+            user_id = request.user.pk
+            restaurant_info = RestaurantInformation.objects.filter(user_id=user_id)
+            if restaurant_info.exists():
+                if username == "superadmin":
+                    res_info = Reservation.objects.all()
+                else:
+                    res_info = Reservation.objects.filter(user_id=user_id)
+                res_serializer = ReservationSeatSerializer(res_info, many=True)
+                return success_response(data=res_serializer.data)
+            else:
+                return success_response(message="No data available")
+        except Exception as e:
+            return error_response(message=str(e))
